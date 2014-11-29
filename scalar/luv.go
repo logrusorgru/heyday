@@ -22,19 +22,21 @@ func (c *Luv) XYZ(io ...int) *XYZ {
 		observer = O2
 	}
 	wp := &white_points[observer][illuminant]
-	wt := WhitePoint(wp.X, wp.Y)                // type XYZ
-	wp = nil                                    // GC (Is it really needed?)
-	usn := 4 * wt.X / (wt.X + 15*wt.Y + 3*wt.Z) // uₙ'
-	vsn := 9 * wt.Y / (wt.X + 15*wt.Y + 3*wt.Z) // vₙ'
-	y := (c.L - 16) / 116                       // pre-f(Qy)
-	if y > 6/29 {
+	wt := WhitePoint(wp.X, wp.Y)              // type XYZ
+	wp = nil                                  // GC (Is it really needed?)
+	usn := 4 * wt.X / (wt.X + c1500 + 3*wt.Z) // uₙ'
+	vsn := 9 * wt.Y / (wt.X + c1500 + 3*wt.Z) // vₙ'
+	y := (c.L + 16) / 116                     // pre-f(Qy)
+	if y > c6d29cbrt {
 		y = math.Pow(y, 3) // Qy
 	} else {
-		y = y*c108d841 - c4d29*c108d841 // Qy
+		y = c108d841 * (y - c4d29) // Qy
 	}
+	us := c.U/(13*c.L) + usn
+	vs := c.V/(13*c.L) + vsn
 	y = y * wt.Y // Qy = Y/Yₙ |=> Y = Qy * Yₙ
-	x := (usn / vsn) * c9d4 * y
-	z := (3/vsn - c3d4*(usn/vsn) - 5) * y
+	x := -(9 * y * us) / ((us-4)*vs - us*vs)
+	z := (9*y - 15*vs*y - vs*x) / (3 * vs)
 	xyz := &XYZ{x, y, z}
 	return xyz
 }
@@ -47,21 +49,21 @@ func (c *Luv) XYZ(io ...int) *XYZ {
 // ref.: ASTM E308 http://wenku.baidu.com/view/1dc90ac20c22590102029dce
 
 func (c *Luv) Hue() float64 {
-	return hue(c.A, c.B)
+	return hue(c.U, c.V)
 }
 
 // return CIE 1976 hue angle [0, 360]° of current color point
 
-func (c *Lab) Chromas() float64 {
-	return chromas(c.A, c.B)
+func (c *Luv) Chromas() float64 {
+	return chromas(c.U, c.V)
 }
 
 // return CIE 1976 chromas o current color point
 
 func (c *Luv) LCH() *LCH {
 	h := hue(c.U, c.V)
-	c := chromas(c.U, c.V)
-	lch := &LCH{c.L, c, h}
+	cc := chromas(c.U, c.V)
+	lch := &LCH{c.L, cc, h}
 	return lch
 }
 
@@ -76,7 +78,7 @@ func (c *Luv) Luv() *Luv {
 // DEBUG
 func (c *Luv) Show() {
 	fmt.Println("CIE L*,u*,v*")
-	fmt.Printf("L*: %.48f", c.X)
-	fmt.Printf("u*: %.48f", c.Y)
-	fmt.Printf("v*: %.48f", c.Z)
+	fmt.Printf("L*: %.48f\n", c.L)
+	fmt.Printf("u*: %.48f\n", c.U)
+	fmt.Printf("v*: %.48f\n", c.V)
 }

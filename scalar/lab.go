@@ -20,20 +20,20 @@ func (c *Lab) XYZ(io ...int) *XYZ {
 	wp := &white_points[observer][illuminant]
 	wt := WhitePoint(wp.X, wp.Y) // type XYZ
 	wp = nil                     // GC (Is it really needed?)
-	y := (l - 16) / 116          // f(Qy)
-	x := a/500 + y               // f(Qx)
-	z := y - b/200               // f(Qz)
+	y := (c.L + 16) / 116        // f(Qy)
+	x := c.A/500 + y             // f(Qx)
+	z := y - c.B/200             // f(Qz)
 	if x > c6d29 {               // eq.: Qx^3 > (6/29)^3 |=> Qx > 6/29
 		x = math.Pow(x, 3) // Qx = f(Qx)^3
 	} else {
 		x = c108d841 * (x - c4d29)
 	}
-	if y > 6/29 {
+	if y > c6d29 {
 		y = math.Pow(y, 3)
 	} else {
 		y = c108d841 * (y - c4d29)
 	}
-	if z > 6/29 {
+	if z > c6d29 {
 		z = math.Pow(z, 3)
 	} else {
 		z = c108d841 * (z - c4d29)
@@ -51,6 +51,7 @@ func (c *Lab) XYZ(io ...int) *XYZ {
 // First param  - set illuminant (optional)
 // Second param - set observer (optional)
 // ref.: ASTM E308 http://wenku.baidu.com/view/1dc90ac20c22590102029dce
+//            math http://mathb.in/24271
 
 func (c *Lab) Hue() float64 {
 	return hue(c.A, c.B)
@@ -66,8 +67,8 @@ func (c *Lab) Chromas() float64 {
 
 func (c *Lab) LCH() *LCH {
 	h := hue(c.A, c.B)
-	c := chromas(c.A, c.B)
-	lch := &LCH{c.L, c, h}
+	cc := chromas(c.A, c.B)
+	lch := &LCH{c.L, cc, h}
 	return lch
 }
 
@@ -79,10 +80,16 @@ func (c *Lab) Lab() *Lab {
 
 // return sefl
 
+func (c *Lab) It() (l, a, b float64) {
+	return c.L, c.A, c.B
+}
+
+// return self values
+
 // DEBUG
 func (c *Lab) Show() {
 	fmt.Println("CIE L*,a*,b*")
-	fmt.Printf("L*: %.48f", c.X)
-	fmt.Printf("a*: %.48f", c.Y)
-	fmt.Printf("b*: %.48f", c.Z)
+	fmt.Printf("L*: %.48f\n", c.L)
+	fmt.Printf("a*: %.48f\n", c.A)
+	fmt.Printf("b*: %.48f\n", c.B)
 }

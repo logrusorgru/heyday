@@ -1,32 +1,8 @@
 package heyday
 
-func WhitePoint(x, y float64) *XYZ {
-	Y := 100 // 100 - like wiki (and ASTM E308); 1 - like lindbloom. Customization?
-	X := (Y / y) * x
-	Z := (Y / y) * (1 - x - y)
-	xyz := &XYZ{X, Y, Z}
-	return xyz
-}
+func (c *XYZ) ChromaticAdaptationBy(ca Camx, src, drn *WP) *XYZ {
 
-// convert x, y chromaticity co-ordinates to X, Y and Z tristimulus values
-// of White Point, where Y = 100
-
-func WhitePointOfIlluminant(illuminant int, observer ...int) (x, y float64) {
-	var o int
-	if len(observer) != 0 {
-		o = observer[0]
-	}
-	return white_points[o][illuminant]
-}
-
-// return particular chromaticity co-ordinates of white point
-// by illuminant and, optional, observer
-// by default observer is 1931 2° Observer
-// Use it like here:
-// 		`WhitePointOfIlluminant( D65, O10 )`
-// Only `O2' and `O10' observers are supported (0 and 1 int, respectively)
-
-func (c *XYZ) ChromaticAdaptationMxWp(ca *Camx, src, drn *WP) *XYZ {
+	// ca is a copy of struct
 
 	var ρ, γ, β float64
 	// ρ, γ, β source/drain
@@ -40,11 +16,11 @@ func (c *XYZ) ChromaticAdaptationMxWp(ca *Camx, src, drn *WP) *XYZ {
 		// Tell me what the hell is true (more usefull)?
 		var wY float64 = 100
 		// source white point
-		wXs := (wY / wys) * wxs
-		wZs := (wY / wys) * (1 - wxs - wys)
+		wXs := (wY / src.Y) * src.X
+		wZs := (wY / src.Y) * (1 - src.X - src.Y)
 		// drain white point
-		wXd := (wY / wyd) * wxd
-		wZd := (wY / wyd) * (1 - wxd - wyd)
+		wXd := (wY / drn.Y) * drn.X
+		wZd := (wY / drn.Y) * (1 - drn.X - drn.Y)
 		/*
 			(!) the `drain' word is more shorter than destination =)
 		*/
@@ -53,12 +29,12 @@ func (c *XYZ) ChromaticAdaptationMxWp(ca *Camx, src, drn *WP) *XYZ {
 		// ref.: http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
 		// the ca.Direct is [Mₐ]
 		sρ, sγ, sβ := ca.Direct[0]*wXs+ca.Direct[1]*wY+ca.Direct[2]*wZs,
-			ca.Direct[4]*wXs+ca.Direct[5]*wY+ca.Direct[6]*wZs,
-			ca.Direct[7]*wXs+ca.Direct[8]*wY+ca.Direct[9]*wZs
+			ca.Direct[3]*wXs+ca.Direct[4]*wY+ca.Direct[5]*wZs,
+			ca.Direct[6]*wXs+ca.Direct[7]*wY+ca.Direct[8]*wZs
 		// cone response domain of drain
 		dρ, dγ, dβ := ca.Direct[0]*wXd+ca.Direct[1]*wY+ca.Direct[2]*wZd,
-			ca.Direct[4]*wXd+ca.Direct[5]*wY+ca.Direct[6]*wZd,
-			ca.Direct[7]*wXd+ca.Direct[8]*wY+ca.Direct[9]*wZd
+			ca.Direct[3]*wXd+ca.Direct[4]*wY+ca.Direct[5]*wZd,
+			ca.Direct[6]*wXd+ca.Direct[7]*wY+ca.Direct[8]*wZd
 		// the quotients
 		ρ, γ, β = dρ/sρ, dγ/sγ, dβ/sβ
 		// leave
@@ -99,9 +75,9 @@ func (c *XYZ) ChromaticAdaptationMxWp(ca *Camx, src, drn *WP) *XYZ {
 	}
 
 	// [M] ⨉ XYZ source
-	X, Y, X := M[0]*wXs+M[1]*wY+M[2]*wZs,
-		M[4]*wXs+M[5]*wY+M[6]*wZs,
-		M[7]*wXs+M[8]*wY+M[9]*wZs
+	X, Y, Z := M[0]*c.X+M[1]*c.Y+M[2]*c.Z,
+		M[3]*c.X+M[4]*c.Y+M[5]*c.Z,
+		M[6]*c.X+M[7]*c.Y+M[8]*c.Z
 
 	xyz := &XYZ{X, Y, Z}
 
@@ -109,8 +85,8 @@ func (c *XYZ) ChromaticAdaptationMxWp(ca *Camx, src, drn *WP) *XYZ {
 }
 
 // Transform current color to another (current color remains the same)
-// by two matrixes of method and two white points - source and drain
-// Your can use your own matrixes and white points
+// by two matrices of method and two white points - source and drain
+// You can use your own matrices and white points
 
 func (c *XYZ) ChromaticAdaptation(from, to int, om ...int) *XYZ {
 	// from - illuminant, const (int) [0,40] required
@@ -137,7 +113,7 @@ func (c *XYZ) ChromaticAdaptation(from, to int, om ...int) *XYZ {
 	ca = &camx[cai]
 	src = &white_points[sobi][from]
 	drn = &white_points[dobi][to]
-	return c.ChromaticAdaptationMxWp(ca, src, drn)
+	return c.ChromaticAdaptationMxWp(*ca, src, drn)
 }
 
 // developer friendly chromatic adaptation if (s)he use standart illuminats,
