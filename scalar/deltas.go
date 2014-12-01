@@ -1,6 +1,7 @@
 package heyday
 
 import (
+	. "github.com/logrusorgru/heyday"
 	"math"
 )
 

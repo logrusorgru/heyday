@@ -2,6 +2,7 @@ package heyday
 
 import (
 	"fmt" // DEBUG
+	. "github.com/logrusorgru/heyday"
 	"math"
 )
 
@@ -17,19 +18,7 @@ func (c *HunterLab) XYZ(io ...int) *XYZ {
 		illuminant = D65
 		observer = O2
 	}
-	wp := &white_points[observer][illuminant]
-	wt := WhitePoint(wp.X, wp.Y) // type XYZ
-	wp = nil                     // GC (Is it really needed?)
-	//
-	qy := math.Pow(c.L/c100, 2)
-	qx := c198_04d175*c.A*c.L*c1d100/(wt.X+wt.Y) + qy // c1d100 = 0.01 = 1/100 means /100
-	qz := qy - c218_11d70*c.B*c.L*c1d100/(wt.Y+wt.Z)  //
-	x := qx * wt.X
-	y := qy * wt.Y
-	z := qz * wt.Z
-	//
-	xyz := &XYZ{x, y, z}
-	return xyz
+	return c.XYZl(&white_points[observer][illuminant])
 }
 
 // Create CIE 1931 Color Space (CIE XYZ) from current Hunter L,a,b
@@ -39,6 +28,21 @@ func (c *HunterLab) XYZ(io ...int) *XYZ {
 // Second param - set observer (optional)
 // ref.: http://fp.optics.arizona.edu/opti588/reading/CIE_Lab_color_space.pdf
 //       http://en.wikipedia.org/wiki/Lab_color_space
+
+func (c *HunterLab) XYZl(io ...int) *XYZ {
+	wt := TristimulusWhite(wp.X, wp.Y) // type XYZ
+	wp = nil                           // GC (Is it really needed?)
+	qy := math.Pow(c.L/c100, 2)
+	qx := c198_04d175*c.A*c.L*c1d100/(wt.X+wt.Y) + qy // c1d100 = 0.01 = 1/100 means /100
+	qz := qy - c218_11d70*c.B*c.L*c1d100/(wt.Y+wt.Z)  //
+	x := qx * wt.X
+	y := qy * wt.Y
+	z := qz * wt.Z
+	return &XYZ{x, y, z}
+}
+
+// more flexible method
+// you can use your own XYZ white point
 
 func (c *HunterLab) HunterLab() *HunterLab {
 	return c

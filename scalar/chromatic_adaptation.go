@@ -1,5 +1,9 @@
 package heyday
 
+import (
+	. "github.com/logrusorgru/heyday"
+)
+
 func (c *XYZ) ChromaticAdaptationBy(ca Camx, src, drn *WP) *XYZ {
 
 	// ca is a copy of struct
@@ -43,7 +47,7 @@ func (c *XYZ) ChromaticAdaptationBy(ca Camx, src, drn *WP) *XYZ {
 	// create M matrix
 	// ref.: http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
 	// the ca.Inverse is [Mₐ]⁻¹
-	var M [9]float64
+	var M [9]float64 // Matrix3x3
 	// enter to closed namespace
 	{
 		// step 1 [ρ, γ, β] ⨉ Ma
@@ -74,7 +78,7 @@ func (c *XYZ) ChromaticAdaptationBy(ca Camx, src, drn *WP) *XYZ {
 		// leave
 	}
 
-	// [M] ⨉ XYZ source
+	// [M] ⨉ XYZ source // M.RightColumn(c.X, c.Y, c.Z)
 	X, Y, Z := M[0]*c.X+M[1]*c.Y+M[2]*c.Z,
 		M[3]*c.X+M[4]*c.Y+M[5]*c.Z,
 		M[6]*c.X+M[7]*c.Y+M[8]*c.Z

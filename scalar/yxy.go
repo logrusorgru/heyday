@@ -1,5 +1,9 @@
 package heyday
 
+import (
+	. "github.com/logrusorgru/heyday"
+)
+
 func (c *Yxy) XYZ() *XYZ {
 	x := (c.Y / c.Yc) * c.Xc
 	z := (c.Y / c.Yc) * (1 - c.Xc - c.Yc)

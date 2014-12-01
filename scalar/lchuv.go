@@ -2,6 +2,7 @@ package heyday
 
 import (
 	"fmt" // DEBUG
+	. "github.com/logrusorgru/heyday"
 	"math"
 )
 
@@ -29,7 +30,7 @@ func (c *LCHuv) LCHuv() *LCHuv {
 // return self
 
 // DEBUG
-func (c *LCH) Show() {
+func (c *LCHuv) Show() {
 	fmt.Println("L*CH°uv")
 	fmt.Printf("L*: %.48f\n", c.L)
 	fmt.Printf("C : %.48f\n", c.C)

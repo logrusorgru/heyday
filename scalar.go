@@ -6,6 +6,7 @@ type CC struct { // cromaticity coordinates
 
 type Color interface {
 	// colors
+	//   xyz based
 	Lab() *Lab
 	XYZ() *XYZ
 	HunterLab() *HunterLab
@@ -13,6 +14,8 @@ type Color interface {
 	LCHuv() *LCHuv
 	LCHab() *LCHab
 	RGB() *RGB
+	//   rgb based
+	HSL() *HSL
 	// delta through CIE L*a*b*
 	DeltaC(*Color) float64
 	DeltaH(*Color) float64
@@ -59,4 +62,8 @@ type HunterLab struct {
 
 type RGB struct {
 	R, G, B float64
+}
+
+type HSL struct {
+	H, S, L float64
 }

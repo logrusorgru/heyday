@@ -120,6 +120,21 @@ func (m *Matrix3x3) Inverse() (*Matrix3x3, error) {
 
 // return inverse matrix of current if it's possible
 
+func (m *Matrix3x3) RightColumn(x, y, z float64) (X, Y, Z float64) {
+	// [X]      [x]
+	// [Y] = [m][y]
+	// [Z]      [z]
+	X, Y, Z = (*m)[0]*x+(*m)[1]*y+(*m)[2]*z,
+		(*m)[3]*x+(*m)[4]*y+(*m)[5]*z,
+		(*m)[6]*x+(*m)[7]*y+(*m)[8]*z
+	return
+}
+
+// multiply the current matrix by a column-matrix on the right.
+// [X]      [x]
+// [Y] = [M][y]
+// [Z]      [z]
+
 // DEBUG
 func (m *Matrix3x3) Show() {
 	fmt.Println("Matrix 3x3")
