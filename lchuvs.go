@@ -6,14 +6,6 @@ import (
 	"math"
 )
 
-/*
-
-	LCH Hue
-	 [0, 360] or [-180, 180] ?
-	 That is the fucking question.
-
-*/
-
 func (c LCHuvs) Luvs() Luvs {
 	for i := 0; i < len(c); i++ {
 		u := math.Cos(degree_2_radian(c[i].H)) * c[i].C

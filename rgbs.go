@@ -24,10 +24,11 @@ func (c RGBs) XYZs(cio ...int) XYZs {
 		illuminant = D65
 		observer = O2
 	}
-	return c.XYZsl(
+	xyzs, _ := c.XYZsl(
 		&rgb_white_points[color_space],
 		&white_points[observer][illuminant],
 	)
+	return xyzs
 }
 
 // default color space sRGB
@@ -39,18 +40,22 @@ func (c RGBs) XYZs(cio ...int) XYZs {
 //	rgbs.XYZs(Adobe_RGB_1998, D50)       | Adobe_RGB_1998, D50, CIE 1931 2° Observer
 //	rgbs.XYZs(Adobe_RGB_1998, D50, O10)  | Adobe_RGB_1998, D50, CIE 1964 10° Observer
 
-func (c RGBs) XYZsl(color_space *Senary, white_point *WP) XYZs {
+func (c RGBs) XYZsl(color_space *Senary, white_point *WP) (XYZs, error) {
+	dmx, err := RgbDirectMatrix(
+		color_space,
+		white_point,
+	)
+	if err != nil {
+		return nil, err
+	}
 	for i := 0; i < len(c); i++ {
-		x, y, z := RgbDirectMatrix(
-			color_space,
-			white_point,
-		).RightColumn(c[i].R, c[i].G, c[i].B)
+		dmx.RightColumn(c[i].R, c[i].G, c[i].B)
 		c[i].R = x // X
 		c[i].G = y // Y
 		c[i].B = z // Z
 	}
 	cc := *(*XYZs)(unsafe.Pointer(&c))
-	return cc
+	return cc, nil
 }
 
 // more flexible method

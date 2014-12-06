@@ -69,8 +69,7 @@ func (c *Luv) Chromas() float64 {
 func (c *Luv) LCHuv() *LCHuv {
 	h := hue(c.U, c.V)
 	cc := chromas(c.U, c.V)
-	lch := &LCHuv{c.L, cc, h}
-	return lch
+	return &LCHuv{c.L, cc, h}
 }
 
 // create L*CH°(uv) version of CIE L*,a*,b*

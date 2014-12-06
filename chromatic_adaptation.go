@@ -4,7 +4,7 @@ import (
 	. "github.com/logrusorgru/heyday"
 )
 
-func (c *XYZ) ChromaticAdaptationBy(ca Camx, src, drn *WP) *XYZ {
+func (c *XYZ) ChromaticAdaptationl(ca Camx, src, drn *WP) *XYZ {
 
 	// ca is a copy of struct
 
@@ -117,7 +117,7 @@ func (c *XYZ) ChromaticAdaptation(from, to int, om ...int) *XYZ {
 	ca = &camx[cai]
 	src = &white_points[sobi][from]
 	drn = &white_points[dobi][to]
-	return c.ChromaticAdaptationMxWp(*ca, src, drn)
+	return c.ChromaticAdaptationl(*ca, src, drn)
 }
 
 // developer friendly chromatic adaptation if (s)he use standart illuminats,

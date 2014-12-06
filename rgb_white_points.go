@@ -80,7 +80,7 @@ func RgbWhitePointOf(color_space int) *Senary {
 
 // return particular rgb white point
 
-func RgbDirectMatrix(cs *Senary, wp *WP) Matrix3x3 { // cs = color_space
+func RgbDirectMatrix(cs *Senary, wp *WP) (*Matrix3x3, error) { // cs = color_space
 	wt := TristimulusWhite(wp.X, wp.Y)
 	Y := float64(1) // Y of white (1 or 100 or 255 or table cell ???)
 	Xr := cs.Xr / cs.Yr
@@ -89,9 +89,13 @@ func RgbDirectMatrix(cs *Senary, wp *WP) Matrix3x3 { // cs = color_space
 	Zg := (1 - cs.Xg - cs.Yg) / cs.Yg
 	Xb := cs.Xb / cs.Yb
 	Zb := (1 - cs.Xb - cs.Yb) / cs.Yb
-	Sr, Sg, Sb := (&Matrix3x3{}).Set(
+	mx, err := (&Matrix3x3{}).Set(
 		Xr, Xg, Xb, Y, Y, Y, Zr, Zg, Zb,
-	).Inverse().RightColumn(wt.X, wt.Y, wt.Z)
+	).Inverse()
+	if err != nil {
+		return nil, err
+	}
+	Sr, Sg, Sb := mx.RightColumn(wt.X, wt.Y, wt.Z)
 	return &Matrix3x3{
 		Sr * Xr, Sg * Xg, Sb * Xb,
 		Sr * Y, Sg * Y, Sb * Y, // if Y 100% == 1, multiplication and Y --> nah...
@@ -106,7 +110,7 @@ func RgbDirectMatrix(cs *Senary, wp *WP) Matrix3x3 { // cs = color_space
 // return matrix [M]
 // argumants: rgb white point (type *Senary) and XYZ white point (type *WP)
 
-func RgbInverseMatrix(cs *Senary, wp *WP) Matrix3x3 { // cs = color_space
+func RgbInverseMatrix(cs *Senary, wp *WP) (*Matrix3x3, error) { // cs = color_space
 	return RgbDirectMatrix(cs, wp).Inverse()
 }
 

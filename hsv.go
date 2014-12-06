@@ -39,7 +39,6 @@ func (c *HSV) RGB() *RGB {
 		v1 := c.V * (1 - c.S)
 		v2 := c.V * (1 - c.S*(h-i))
 		v3 := c.V * (1 - c.S*(1-(h-i)))
-
 		if i == 0 {
 			r = c.V
 			g = v3
@@ -65,13 +64,11 @@ func (c *HSV) RGB() *RGB {
 			g = v1
 			b = v2
 		}
-
 		r = r * 255 //RGB results from 0 to 255
 		g = g * 255
 		b = b * 255
 	}
-	rgb := &RGB{r, g, b}
-	return rgb
+	return &RGB{r, g, b}
 
 }
 

@@ -14,24 +14,23 @@ import (
 
 */
 
-func (c *LCHuv) Luv() *Luv {
-	u := math.Cos(degree_2_radian(c.H)) * c.C
-	v := math.Sin(degree_2_radian(c.H)) * c.C
-	luv := &Luv{c.L, u, v}
-	return luv
+func (c *LCHab) Lab() *Lab {
+	a := math.Cos(degree_2_radian(c.H)) * c.C
+	b := math.Sin(degree_2_radian(c.H)) * c.C
+	return &Lab{c.L, a, b}
 }
 
-// create CIE L*,u*,v* from current color point
+// create CIE L*,a*,b* from current color point
 
-func (c *LCHuv) LCHuv() *LCHuv {
+func (c *LCHab) LCHab() *LCHab {
 	return c
 }
 
 // return self
 
 // DEBUG
-func (c *LCHuv) Show() {
-	fmt.Println("L*CH°uv")
+func (c *LCHab) Show() {
+	fmt.Println("L*CH°ab")
 	fmt.Printf("L*: %.48f\n", c.L)
 	fmt.Printf("C : %.48f\n", c.C)
 	fmt.Printf("H°: %.48f\n", c.H)

@@ -4,7 +4,7 @@ import (
 	. "github.com/logrusorgru/heyday"
 )
 
-func (c XYZs) ChromaticAdaptationBy(ca Camx, src, drn *WP) XYZs {
+func (c XYZs) ChromaticAdaptationl(ca Camx, src, drn *WP) XYZs {
 	// ca is a copy of struct
 
 	var ρ, γ, β float64
@@ -122,7 +122,7 @@ func (c XYZs) ChromaticAdaptation(from, to int, om ...int) XYZs {
 	ca = &camx[cai]
 	src = &white_points[sobi][from]
 	drn = &white_points[dobi][to]
-	return c.ChromaticAdaptationBy(*ca, src, drn)
+	return c.ChromaticAdaptationl(*ca, src, drn)
 }
 
 // developer friendly chromatic adaptation if (s)he use standart illuminats,

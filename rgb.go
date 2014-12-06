@@ -25,10 +25,11 @@ func (c *RGB) XYZ(cio ...int) *XYZ {
 		illuminant = D65
 		observer = O2
 	}
-	return c.XYZl(
+	xyz, _ := c.XYZl( // fuck the error
 		&rgb_white_points[color_space],
 		&white_points[observer][illuminant],
 	)
+	return xyz
 }
 
 // default color space sRGB
@@ -40,12 +41,16 @@ func (c *RGB) XYZ(cio ...int) *XYZ {
 //	rgb.XYZ(Adobe_RGB_1998, D50)
 //	rgb.XYZ(Adobe_RGB_1998, D50, O10)
 
-func (c *RGB) XYZl(color_space *Senary, white_point *WP) *XYZ {
-	x, y, z := RgbDirectMatrix(
+func (c *RGB) XYZl(color_space *Senary, white_point *WP) (*XYZ, error) {
+	dmx, err := RgbDirectMatrix(
 		color_space,
 		white_point,
-	).RightColumn(c.R, c.G, c.B)
-	return &XYZ{x, y, z}
+	)
+	if err != nil {
+		return nil, err
+	}
+	x, y, z := dmx.RightColumn(c.R, c.G, c.B)
+	return &XYZ{x, y, z}, nil
 }
 
 // more flexible method
